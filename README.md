@@ -90,8 +90,8 @@ Attribution of the physical sender location was therefore not possible through h
 
 Use of trusted cloud-email infrastructure does not independently establish sender legitimacy. Modern fraud campaigns frequently leverage reputable email providers to increase deliverability and user trust.
 
-Authentication Assessment
-SPF
+## Authentication Assessment
+### SPF
 
 Result:
 
@@ -100,7 +100,7 @@ No effective SPF protection observed.
 Impact:
 
 Reduced ability to verify authorized sending systems.
-DMARC
+### DMARC
 
 Result:
 
@@ -109,7 +109,7 @@ No effective DMARC policy observed.
 Impact:
 
 Reduced protection against domain impersonation and abuse.
-DKIM
+### DKIM
 
 Result:
 
@@ -126,92 +126,94 @@ Assessment:
 
 High Authentication Risk
 
-Domain Intelligence Analysis
+### Domain Intelligence Analysis
 Domain Characteristics
 
 Investigation identified several notable observations:
 
-Limited public web presence
-Minimal discoverable business footprint
-Restricted publicly verifiable corporate information
-Primarily email-focused infrastructure
-Analytical Interpretation
+Limited public web presence</br>
+Minimal discoverable business footprint</br>
+Restricted publicly verifiable corporate information</br>
+Primarily email-focused infrastructure</br>
+Analytical Interpretation</br>
 
 While these findings do not independently prove malicious intent, they reduce confidence in the legitimacy of the organization and increase overall risk when combined with other indicators.
 
-IP Reputation Assessment
+### IP Reputation Assessment
 
 The mail relay infrastructure showed historical abuse reports associated with the shared service environment.
 
 Important context:
 
-Shared cloud infrastructure serves millions of users.
-Abuse reports cannot automatically be attributed to a specific sender.
-Reputation findings must therefore be considered alongside other evidence.
+Shared cloud infrastructure serves millions of users.</br>
+Abuse reports cannot automatically be attributed to a specific sender.</br>
+Reputation findings must therefore be considered alongside other evidence.</br>
 
 Assessment:
 
 Contextual Risk Indicator — Not Direct Attribution Evidence
 
-Social Engineering Assessment
+### Social Engineering Assessment
 
 Content analysis identified multiple behavioral indicators commonly observed in business-email fraud and financial-manipulation schemes.
 
 Examples included:
 
-Requests involving financial liability or guarantees
-Reliance on third-party trust references
-Limited independent verification opportunities
-Collection of business-related information
-Reassurance-focused language regarding financial risk
-Minimal verifiable organizational identity
-Pressure to establish trust before verification
-Behavioral Pattern Analysis
+Requests involving financial liability or guarantees</br>
+Reliance on third-party trust references</br>
+Limited independent verification opportunities</br>
+Collection of business-related information</br>
+Reassurance-focused language regarding financial risk</br>
+Minimal verifiable organizational identity</br>
+Pressure to establish trust before verification</br>
+
+### Behavioral Pattern Analysis
 
 No single indicator conclusively demonstrated malicious intent.
 
 However, the cumulative pattern was consistent with techniques frequently observed in:
 
-Business Email Compromise (BEC)
-Investment-related fraud
-Advance-fee fraud schemes
-Social-engineering operations
+Business Email Compromise (BEC)</br>
+Investment-related fraud</br>
+Advance-fee fraud schemes</br>
+Social-engineering operations</br>
 
 Assessment:
 
 High Social Engineering Risk
 
-Attribution Limitations
+### Attribution Limitations
 
 A critical principle of digital forensics is acknowledging evidentiary limitations.
 
 Based solely on standard email headers:
 
-Physical sender location could not be determined.
-Device attribution could not be established.
-Identity attribution could not be confirmed.
+Physical sender location could not be determined.</br>
+Device attribution could not be established</br>.
+Identity attribution could not be confirmed.</br>
 
 Additional legal process and service-provider records would be required for definitive attribution.
 
-Risk Assessment
-Category	Assessment
-Malware Risk	Low
-Credential Theft Risk	Low
-Infrastructure Risk	Moderate
-Authentication Risk	High
-Financial Fraud Risk	High
-Social Engineering Risk	Critical
-Final Assessment
+## Risk Assessment
+Category	       |            Assessment
+Malware Risk         |     	Low
+Credential Theft Risk    | 	Low
+Infrastructure Risk       |	Moderate
+Authentication Risk	       | High
+Financial Fraud Risk	  |   High
+Social Engineering Risk	 |   Critical
+
+## Final Assessment
 
 The investigation identified numerous technical and behavioral indicators that collectively elevated the overall risk profile of the communication.
 
 While no malware payloads or credential-harvesting mechanisms were identified, the combination of:
 
-Weak authentication controls
-Limited business verifiability
-Reliance on trusted third-party infrastructure
-Multiple social-engineering indicators
-Financial-risk-related communication
+Weak authentication controls</br>
+Limited business verifiability</br>
+Reliance on trusted third-party infrastructure</br>
+Multiple social-engineering indicators</br>
+Financial-risk-related communication</br>
 
 resulted in a high-confidence assessment that the communication posed significant business and financial risk.
 
@@ -219,7 +221,7 @@ resulted in a high-confidence assessment that the communication posed significan
 
 The email was assessed as a likely social-engineering communication and was considered unsuitable for engagement without extensive independent verification and due diligence.
 
-Skills Demonstrated</br>
+## Skills Demonstrated
 Email Header Analysis</br>
 Email Authentication Validation</br>
 SPF/DKIM/DMARC Assessment</br>
@@ -230,7 +232,8 @@ Open-Source Intelligence (OSINT)</br>
 Social Engineering Detection</br>
 Risk Assessment</br>
 Digital Forensic Reporting</br>
-Tools Utilized</br>
+
+## Tools Utilized
 Email Header Analysis Tools</br>
 DNS Lookup Utilities</br>
 WHOIS Intelligence Sources</br>
