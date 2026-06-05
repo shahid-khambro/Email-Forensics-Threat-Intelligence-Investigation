@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Forensics & Threat Intelligence | Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --surface2: #111820;
+    --border: rgba(0,255,140,0.12);
+    --accent: #00ff8c;
+    --accent2: #00c8ff;
+    --accent3: #ff4c6e;
+    --warn: #ffb700;
+    --text: #d4dde8;
+    --text-dim: #6b7a8d;
+    --text-bright: #eaf2ff;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+    --glow: 0 0 20px rgba(0,255,140,0.18);
+    --glow2: 0 0 20px rgba(0,200,255,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Scan line overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.5;
+  }
+
+  /* ——— HEADER ——— */
+  header {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .header-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,140,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,140,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: grid-drift 20s linear infinite;
+  }
+
+  @keyframes grid-drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+
+  .header-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,140,0.08) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    pointer-events: none;
+  }
+
+  .header-glow2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+    bottom: 0;
+    left: -80px;
+    pointer-events: none;
+  }
+
+  .header-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,255,140,0.07);
+    border: 1px solid rgba(0,255,140,0.25);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    padding: 6px 14px;
+    border-radius: 3px;
+    margin-bottom: 2.5rem;
+    animation: fade-in 0.6s ease forwards;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,140,0.4); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(0,255,140,0); }
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(2.4rem, 6vw, 4.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text-bright);
+    letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+    animation: slide-up 0.7s ease 0.1s both;
+  }
+
+  h1 span {
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,255,140,0.4);
+  }
+
+  .header-sub {
+    font-family: var(--body);
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    max-width: 560px;
+    margin-bottom: 3rem;
+    animation: slide-up 0.7s ease 0.2s both;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    animation: slide-up 0.7s ease 0.3s both;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .meta-value {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent2);
+  }
+
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ——— MAIN LAYOUT ——— */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ——— SECTION ——— */
+  section {
+    margin-bottom: 5rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  p {
+    color: var(--text);
+    font-size: 0.97rem;
+    margin-bottom: 1rem;
+    max-width: 720px;
+  }
+
+  /* ——— OBJECTIVES GRID ——— */
+  .obj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .obj-item {
+    background: var(--surface);
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    transition: background 0.2s;
+  }
+
+  .obj-item:hover { background: var(--surface2); }
+
+  .obj-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .obj-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  /* ——— PHASES ——— */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--border);
+  }
+
+  .phase {
+    background: var(--surface);
+    padding: 1.4rem 1.6rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .phase:hover { background: var(--surface2); }
+
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: rgba(0,255,140,0.07);
+    border: 1px solid rgba(0,255,140,0.2);
+    padding: 4px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  .phase-content {}
+  .phase-title {
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 0.4rem;
+  }
+
+  .phase-desc {
+    font-size: 0.84rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ——— FINDINGS CARDS ——— */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .finding-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .finding-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0,255,140,0.25);
+  }
+
+  .finding-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .finding-card.low::before { background: #00c896; }
+  .finding-card.moderate::before { background: var(--warn); }
+  .finding-card.high::before { background: #ff7940; }
+  .finding-card.critical::before { background: var(--accent3); }
+
+  .finding-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .finding-card.low .finding-label { color: #00c896; }
+  .finding-card.moderate .finding-label { color: var(--warn); }
+  .finding-card.high .finding-label { color: #ff7940; }
+  .finding-card.critical .finding-label { color: var(--accent3); }
+
+  .finding-title {
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 0.5rem;
+  }
+
+  .finding-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* ——— AUTH TABLE ——— */
+  .auth-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.3rem;
+  }
+
+  .auth-protocol {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--accent2);
+    margin-bottom: 0.4rem;
+  }
+
+  .auth-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,76,110,0.1);
+    border: 1px solid rgba(255,76,110,0.25);
+    color: var(--accent3);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 0.7rem;
+  }
+
+  .auth-result::before {
+    content: '✗';
+    font-size: 0.8rem;
+  }
+
+  .auth-impact {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* ——— RISK TABLE ——— */
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .risk-table thead {
+    background: rgba(0,255,140,0.05);
+  }
+
+  .risk-table th {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 1rem 1.4rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .risk-table td {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+
+  .risk-table tr:last-child td { border-bottom: none; }
+  .risk-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .risk-cat { font-weight: 500; color: var(--text-bright); }
+
+  .risk-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+  }
+
+  .risk-pill.low { background: rgba(0,200,150,0.12); color: #00c896; border: 1px solid rgba(0,200,150,0.25); }
+  .risk-pill.moderate { background: rgba(255,183,0,0.12); color: var(--warn); border: 1px solid rgba(255,183,0,0.25); }
+  .risk-pill.high { background: rgba(255,121,64,0.12); color: #ff7940; border: 1px solid rgba(255,121,64,0.25); }
+  .risk-pill.critical { background: rgba(255,76,110,0.12); color: var(--accent3); border: 1px solid rgba(255,76,110,0.25); }
+
+  /* ——— SE INDICATORS ——— */
+  .se-list {
+    counter-reset: se;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .se-list li {
+    counter-increment: se;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem 1rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.88rem;
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  .se-list li:hover { border-color: rgba(255,76,110,0.3); }
+
+  .se-list li::before {
+    content: counter(se, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent3);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ——— SKILLS / TOOLS ——— */
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid;
+    letter-spacing: 0.05em;
+  }
+
+  .tag.skill {
+    background: rgba(0,200,255,0.06);
+    color: var(--accent2);
+    border-color: rgba(0,200,255,0.2);
+  }
+
+  .tag.tool {
+    background: rgba(0,255,140,0.06);
+    color: var(--accent);
+    border-color: rgba(0,255,140,0.2);
+  }
+
+  /* ——— CONCLUSION ——— */
+  .conclusion-box {
+    background: linear-gradient(135deg, rgba(255,76,110,0.06), rgba(255,183,0,0.04));
+    border: 1px solid rgba(255,76,110,0.25);
+    border-radius: 10px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conclusion-box::before {
+    content: '⚠';
+    position: absolute;
+    right: 2rem;
+    top: 1.5rem;
+    font-size: 4rem;
+    opacity: 0.06;
+    line-height: 1;
+  }
+
+  .conclusion-box h3 {
+    font-family: var(--display);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--accent3);
+    margin-bottom: 1rem;
+    margin-top: 0;
+  }
+
+  .conclusion-box p {
+    color: var(--text);
+    max-width: none;
+  }
+
+  /* ——— FOOTER ——— */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  footer span { color: var(--accent); }
+
+  /* ——— DIVIDER ——— */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 3rem 0;
+  }
+
+  /* ——— SCROLL ANIMATIONS ——— */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-grid"></div>
+  <div class="header-glow"></div>
+  <div class="header-glow2"></div>
+  <div class="header-inner">
+    <div class="badge">PORTFOLIO CASE STUDY · SANITIZED FOR PUBLICATION</div>
+    <h1>Email Forensics &<br><span>Threat Intelligence</span><br>Investigation</h1>
+    <p class="header-sub">A structured forensic analysis of a suspicious business communication — examining authentication weaknesses, delivery infrastructure, and behavioral indicators of social-engineering fraud.</p>
+    <div class="header-meta">
+      <div class="meta-item">
+        <span class="meta-label">Domain</span>
+        <span class="meta-value">Email Forensics / OSINT</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Threat Type</span>
+        <span class="meta-value">BEC / Social Engineering</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Final Assessment</span>
+        <span class="meta-value" style="color:var(--accent3)">HIGH RISK</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Status</span>
+        <span class="meta-value" style="color:var(--warn)">CASE CLOSED</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="reveal">
+    <div class="section-label">00 · Overview</div>
+    <h2>Investigation Brief</h2>
+    <p>This case study demonstrates a comprehensive email forensics and threat intelligence investigation conducted on a suspicious business communication that exhibited multiple indicators of financial and social-engineering risk.</p>
+    <p>The objective was to determine whether the email represented a legitimate business inquiry — or a deceptive communication designed to obtain financial commitments, sensitive information, or business cooperation under false pretenses.</p>
+  </section>
+
+  <!-- OBJECTIVES -->
+  <section class="reveal">
+    <div class="section-label">01 · Objectives</div>
+    <h2>Investigation Goals</h2>
+    <div class="obj-grid">
+      <div class="obj-item"><span class="obj-num">01</span><span class="obj-text">Validate sender authenticity</span></div>
+      <div class="obj-item"><span class="obj-num">02</span><span class="obj-text">Analyze email authentication mechanisms</span></div>
+      <div class="obj-item"><span class="obj-num">03</span><span class="obj-text">Examine delivery infrastructure</span></div>
+      <div class="obj-item"><span class="obj-num">04</span><span class="obj-text">Assess domain legitimacy</span></div>
+      <div class="obj-item"><span class="obj-num">05</span><span class="obj-text">Evaluate IP reputation</span></div>
+      <div class="obj-item"><span class="obj-num">06</span><span class="obj-text">Identify social-engineering indicators</span></div>
+      <div class="obj-item"><span class="obj-num">07</span><span class="obj-text">Determine overall fraud risk</span></div>
+    </div>
+  </section>
+
+  <!-- METHODOLOGY -->
+  <section class="reveal">
+    <div class="section-label">02 · Methodology</div>
+    <h2>Forensic Workflow</h2>
+    <div class="phases">
+      <div class="phase">
+        <span class="phase-num">PH-01</span>
+        <div class="phase-content">
+          <div class="phase-title">Email Header Analysis</div>
+          <div class="phase-desc">Examination of message routing, relay infrastructure, authentication results, message identifiers, time zone indicators, and delivery anomalies.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-num">PH-02</span>
+        <div class="phase-content">
+          <div class="phase-title">Email Authentication Review</div>
+          <div class="phase-desc">Analysis of SPF, DKIM, DMARC, ARC controls, and Return-Path alignment to establish the sender's authentication posture.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-num">PH-03</span>
+        <div class="phase-content">
+          <div class="phase-title">Infrastructure Intelligence</div>
+          <div class="phase-desc">DNS analysis, MX record enumeration, WHOIS investigation, hosting footprint review, and historical infrastructure observations.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-num">PH-04</span>
+        <div class="phase-content">
+          <div class="phase-title">Threat Intelligence Collection</div>
+          <div class="phase-desc">Consultation of external intelligence sources to evaluate IP reputation, abuse history, and known malicious associations.</div>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-num">PH-05</span>
+        <div class="phase-content">
+          <div class="phase-title">Behavioral Analysis</div>
+          <div class="phase-desc">Content review for social-engineering tactics, financial manipulation indicators, urgency cues, and information-harvesting attempts.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECHNICAL FINDINGS -->
+  <section class="reveal">
+    <div class="section-label">03 · Technical Findings</div>
+    <h2>Delivery Infrastructure</h2>
+    <p>Analysis revealed the message was delivered through major cloud-based email provider infrastructure. The relay systems themselves were not malicious — but the sender's originating IP address was not exposed in standard headers, preventing physical attribution.</p>
+    <div style="background:var(--surface);border:1px solid rgba(255,183,0,0.2);border-left:3px solid var(--warn);border-radius:4px;padding:1.1rem 1.4rem;margin-top:1.2rem;font-size:0.86rem;color:var(--warn);">
+      <strong>Key Observation:</strong> <span style="color:var(--text)">Use of trusted cloud-email infrastructure does not independently establish sender legitimacy. Modern fraud campaigns frequently leverage reputable providers to increase deliverability and user trust.</span>
+    </div>
+  </section>
+
+  <!-- AUTHENTICATION -->
+  <section class="reveal">
+    <div class="section-label">04 · Authentication</div>
+    <h2>Email Authentication Assessment</h2>
+    <div class="auth-grid">
+      <div class="auth-card">
+        <div class="auth-protocol">SPF</div>
+        <div class="auth-result">NO PROTECTION</div>
+        <div class="auth-impact">Reduced ability to verify authorized sending systems for this domain.</div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-protocol">DMARC</div>
+        <div class="auth-result">NO POLICY</div>
+        <div class="auth-impact">No protection against domain impersonation or unauthorized use.</div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-protocol">DKIM</div>
+        <div class="auth-result">INCOMPLETE</div>
+        <div class="auth-impact">Cryptographic verification of sender authenticity weakened by improper implementation.</div>
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;background:rgba(255,76,110,0.06);border:1px solid rgba(255,76,110,0.2);border-radius:6px;padding:1rem 1.4rem;display:flex;align-items:center;gap:12px;">
+      <span style="font-family:var(--mono);font-size:0.7rem;color:var(--text-dim)">OVERALL POSTURE</span>
+      <span class="risk-pill high">HIGH AUTHENTICATION RISK</span>
+    </div>
+  </section>
+
+  <!-- DOMAIN INTELLIGENCE -->
+  <section class="reveal">
+    <div class="section-label">05 · Domain Intelligence</div>
+    <h2>Domain Analysis</h2>
+    <div class="findings-grid">
+      <div class="finding-card high">
+        <div class="finding-label">High Risk</div>
+        <div class="finding-title">Limited Web Presence</div>
+        <div class="finding-desc">Minimal discoverable business footprint and restricted publicly verifiable corporate information.</div>
+      </div>
+      <div class="finding-card moderate">
+        <div class="finding-label">Moderate Risk</div>
+        <div class="finding-title">Email-Only Infrastructure</div>
+        <div class="finding-desc">Domain appeared to be primarily configured for email sending with no substantial supporting web presence.</div>
+      </div>
+      <div class="finding-card moderate">
+        <div class="finding-label">Moderate Risk</div>
+        <div class="finding-title">IP Reputation</div>
+        <div class="finding-desc">Shared cloud infrastructure showed historical abuse reports. Cannot be directly attributed to this sender without further legal process.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL ENGINEERING -->
+  <section class="reveal">
+    <div class="section-label">06 · Behavioral Analysis</div>
+    <h2>Social Engineering Indicators</h2>
+    <p>Content analysis identified multiple behavioral indicators commonly observed in business-email fraud and financial-manipulation schemes.</p>
+    <ul class="se-list">
+      <li>Requests involving financial liability or guarantees</li>
+      <li>Reliance on third-party trust references without independent verification</li>
+      <li>Limited opportunities for independent verification of claims</li>
+      <li>Collection of business-related sensitive information</li>
+      <li>Reassurance-focused language specifically addressing financial risk</li>
+      <li>Minimal verifiable organizational identity or digital footprint</li>
+      <li>Pressure to establish trust prior to completion of due diligence</li>
+    </ul>
+    <div style="margin-top:1.5rem;background:rgba(255,76,110,0.06);border:1px solid rgba(255,76,110,0.2);border-radius:6px;padding:1rem 1.4rem;">
+      <p style="font-size:0.84rem;color:var(--text-dim);margin:0;">No single indicator conclusively demonstrates malicious intent. However, the <strong style="color:var(--text)">cumulative pattern</strong> is consistent with techniques observed in BEC campaigns, investment-related fraud, advance-fee fraud schemes, and coordinated social-engineering operations.</p>
+    </div>
+  </section>
+
+  <!-- RISK TABLE -->
+  <section class="reveal">
+    <div class="section-label">07 · Risk Assessment</div>
+    <h2>Risk Summary Matrix</h2>
+    <table class="risk-table">
+      <thead>
+        <tr>
+          <th>Risk Category</th>
+          <th>Assessment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="risk-cat">Malware Risk</td><td><span class="risk-pill low">LOW</span></td></tr>
+        <tr><td class="risk-cat">Credential Theft Risk</td><td><span class="risk-pill low">LOW</span></td></tr>
+        <tr><td class="risk-cat">Infrastructure Risk</td><td><span class="risk-pill moderate">MODERATE</span></td></tr>
+        <tr><td class="risk-cat">Authentication Risk</td><td><span class="risk-pill high">HIGH</span></td></tr>
+        <tr><td class="risk-cat">Financial Fraud Risk</td><td><span class="risk-pill high">HIGH</span></td></tr>
+        <tr><td class="risk-cat">Social Engineering Risk</td><td><span class="risk-pill critical">CRITICAL</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ATTRIBUTION -->
+  <section class="reveal">
+    <div class="section-label">08 · Attribution</div>
+    <h2>Evidentiary Limitations</h2>
+    <p>A critical principle of digital forensics is acknowledging the boundaries of evidence. Based solely on standard email headers:</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:1rem;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:0.9rem 1.2rem;font-size:0.86rem;display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:var(--accent3);font-family:var(--mono);font-size:0.7rem;margin-top:1px;flex-shrink:0;">LIM-01</span>
+        <span>Physical sender location could not be determined from header data alone.</span>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:0.9rem 1.2rem;font-size:0.86rem;display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:var(--accent3);font-family:var(--mono);font-size:0.7rem;margin-top:1px;flex-shrink:0;">LIM-02</span>
+        <span>Device attribution could not be established without additional technical evidence.</span>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:0.9rem 1.2rem;font-size:0.86rem;display:flex;gap:10px;align-items:flex-start;">
+        <span style="color:var(--accent3);font-family:var(--mono);font-size:0.7rem;margin-top:1px;flex-shrink:0;">LIM-03</span>
+        <span>Identity attribution requires legal process and direct service-provider records.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <section class="reveal">
+    <div class="section-label">09 · Conclusion</div>
+    <div class="conclusion-box">
+      <h3>Final Assessment</h3>
+      <p>The investigation identified numerous technical and behavioral indicators that collectively elevated the overall risk profile of the communication. While no malware payloads or credential-harvesting mechanisms were identified, the combination of weak authentication controls, limited business verifiability, reliance on trusted third-party infrastructure, multiple social-engineering indicators, and financial-risk-related content resulted in a high-confidence assessment.</p>
+      <p style="margin-top:1rem;"><strong style="color:var(--text-bright)">The email was assessed as a likely social-engineering communication</strong> and considered unsuitable for engagement without extensive independent verification and due diligence.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SKILLS -->
+  <section class="reveal">
+    <div class="section-label">Skills Demonstrated</div>
+    <div class="tag-cloud" style="margin-bottom:2rem;">
+      <span class="tag skill">Email Header Analysis</span>
+      <span class="tag skill">Authentication Validation</span>
+      <span class="tag skill">SPF / DKIM / DMARC</span>
+      <span class="tag skill">Threat Intelligence Research</span>
+      <span class="tag skill">DNS & MX Analysis</span>
+      <span class="tag skill">Infrastructure Investigation</span>
+      <span class="tag skill">OSINT</span>
+      <span class="tag skill">Social Engineering Detection</span>
+      <span class="tag skill">Risk Assessment</span>
+      <span class="tag skill">Digital Forensic Reporting</span>
+    </div>
+    <div class="section-label">Tools Utilized</div>
+    <div class="tag-cloud">
+      <span class="tag tool">Email Header Analyzers</span>
+      <span class="tag tool">DNS Lookup Utilities</span>
+      <span class="tag tool">WHOIS Intelligence</span>
+      <span class="tag tool">Threat Intel Platforms</span>
+      <span class="tag tool">Reputation Analysis Services</span>
+      <span class="tag tool">Mail Auth Validators</span>
+      <span class="tag tool">OSINT Frameworks</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Portfolio case study · All identifying information sanitized for publication · <span>Email Forensics & Threat Intelligence</span></p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
